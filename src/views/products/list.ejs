@@ -1,0 +1,26 @@
+<%- include('../partials/head') %>
+
+  <link rel="stylesheet" href="/css/style.css">
+  </head>
+  
+  <body>
+    <%- include('../partials/header') %>
+    <h1>Productos</h1>
+    
+    <div>
+        <a href="/products/create">Nuevo</a>
+    </div>
+
+    <div>
+      <% products.forEach( prod => { %>
+        <div class="product">
+            <div><%= prod.name %></div>
+            <div><%= prod.price %></div>
+            <div><a href="/products/edit/<%= prod.id %>">Editar</a></div>
+            <div><form action="/products/delete/<%= prod.id %>?_method=delete"><button type="submit">Eliminar</button></form></div>
+        </div>
+      <% } ) %>
+    </div>
+
+  </body>
+</html>
