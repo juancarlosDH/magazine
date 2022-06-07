@@ -1,23 +1,46 @@
-let products = [
-    { id: 1, name: 'Product 1', price: 100, img: 'ruta..' },
-    { id: 2, name: 'Product 2', price: 99, img: 'ruta..' },
-    { id: 3, name: 'Product 3', price: 300, img: 'ruta..' }
-]
+const fs = require('fs')
+const path = require('path')
 
-
-module.exports = {
+const controller = {
+    readJson: function () {
+        const pJson = fs.readFileSync(path.join(__dirname, '../database/products.json'));
+        const products = JSON.parse(pJson)
+        return products
+    },
+    writeJson: function (prods) {
+        const data = JSON.stringify(prods, null, 4)
+        const pJson = fs.writeFileSync(path.join(__dirname, '../database/products.json'), data);
+        return pJson
+    },
+    lastProductId: function(prods) {
+        if (prods.length == 0) { return 0 }
+        return Math.max(...prods.map(p => p.id))
+    },
     index: function(req, res) {
-        
-        return res.render('products/list', { products: products });
+        const prods = controller.readJson() 
+        return res.render('products/list', { products: prods });
     },
     formNew: function(req, res) {
         return res.render('products/form');
     },
     create: function(req, res) {
-        //imprimir los datos que vienen de formulario
+        //leer el json
+        const prods = controller.readJson() 
+
+        const idCalculated = controller.lastProductId(prods) + 1
+
+        //si hay imagen
+        let image = '';
+        if (req.file) {
+            //le saco la palabra public para que sea a partir
+            image = req.file.filename;
+        }
 
         //guardo el nuevo producto con la estructura
-        products.push({ id: 99, name: req.body.name, price: req.body.price, img: 'ruta..' })
+        prods.push({ id: idCalculated, name: req.body.name, price: req.body.price, img: image })
+
+        //reescribo el json
+        controller.writeJson(prods)
 
         //redireccione al listado de productos        
         return res.redirect('/products');
@@ -36,3 +59,5 @@ module.exports = {
         //hacer la eliminacion
     }
 }
+
+module.exports = controller
