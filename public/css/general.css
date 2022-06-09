@@ -92,6 +92,7 @@ section{
 
 .form-new>div {
     flex-basis: 100%;
+    margin-top: 10px;
 }
 
 .form-new>div>label {

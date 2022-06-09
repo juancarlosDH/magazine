@@ -1,23 +1,11 @@
-const fs = require('fs')
-const path = require('path')
+const databaseJson = require('../database/databaseJson')
+
+const databaseFilename = '../database/products.json';
+
 
 const controller = {
-    readJson: function () {
-        const pJson = fs.readFileSync(path.join(__dirname, '../database/products.json'));
-        const products = JSON.parse(pJson)
-        return products
-    },
-    writeJson: function (prods) {
-        const data = JSON.stringify(prods, null, 4)
-        const pJson = fs.writeFileSync(path.join(__dirname, '../database/products.json'), data);
-        return pJson
-    },
-    lastProductId: function(prods) {
-        if (prods.length == 0) { return 0 }
-        return Math.max(...prods.map(p => p.id))
-    },
     index: function(req, res) {
-        const prods = controller.readJson() 
+        const prods = databaseJson.readJson(databaseFilename) 
         return res.render('products/list', { products: prods });
     },
     formNew: function(req, res) {
@@ -25,9 +13,9 @@ const controller = {
     },
     create: function(req, res) {
         //leer el json
-        const prods = controller.readJson() 
+        const prods = databaseJson.readJson(databaseFilename) 
 
-        const idCalculated = controller.lastProductId(prods) + 1
+        const idCalculated = databaseJson.lastElementId(prods) + 1
 
         //si hay imagen
         let image = '';
@@ -40,20 +28,58 @@ const controller = {
         prods.push({ id: idCalculated, name: req.body.name, price: req.body.price, img: image })
 
         //reescribo el json
-        controller.writeJson(prods)
+        databaseJson.writeJson(prods, databaseFilename)
 
         //redireccione al listado de productos        
         return res.redirect('/products');
     },
     formEdit: function(req, res) {
         //return res.send(req.params);
-        //filtrar y buscar
-        let product = { id: 99, name: 'producto a editar', price: 1200, img: 'ruta..' }
+        const products = databaseJson.readJson(databaseFilename) 
 
-        return res.render('products/edit', {product: product});
+        //filtrar y buscar
+        let product = products.filter(p => {
+            return p.id == req.params.id
+        })
+
+        //si no existe el producto??
+        //let product = { id: 99, name: 'producto a editar', price: 1200, img: 'ruta..' }
+
+        return res.render('products/edit', {product: product[0]});
     },
-    edit: function(req, res) {
-        //hacer la edicion
+    update: function(req, res) {
+        //validar los datos
+
+        //leer el archivo json
+        let prods = databaseJson.readJson(databaseFilename)
+
+        //guardarlo
+        prods = prods.map(p => {
+            if (p.id == req.params.id) {
+                /*let product = { 
+                    id: p.id,
+                    name: req.body.name,
+                    price: req.body.price,
+                    img: p.img
+                }
+                if (req.file) { //si me enviaron la imagen entonces la piso
+                    product.img = req.file.filename
+                }
+                return product*/
+                p.name = req.body.name
+                p.price = req.body.price
+                if (req.file) { //si me enviaron la imagen entonces la piso
+                    p.img = req.file.filename
+                }
+            }
+            return p
+        })
+        
+        //reescribo el json
+        databaseJson.writeJson(prods, databaseFilename)
+
+        //redireccionar
+        return res.redirect('/products')
     },
     delete: function(req,res) {
         //hacer la eliminacion

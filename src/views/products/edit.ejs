@@ -5,9 +5,13 @@
   
   <body>
     <%- include('../partials/header') %>
-    <h1>Editar Producto</h1>
+    <main>
+      <div class="container">
+        <div class="section-title">
+          <h1>Editar Producto</h1>
+        </div>
     
-    <form action="/products/edit/<%= product.id %>?_method=put" method="POST">
+    <form class="form-new" action="/products/<%= product.id %>?_method=put" method="POST">
         <div>
             <label for="name">Nombre</label>
             <input type="text" name="name" id="name" value="<%= product.name %>">
@@ -18,11 +22,15 @@
             <input type="text" name="price" id="price" value="<%= product.price %>">
         </div>
 
+        <div></div>
+
         <div>
             <button type="submit">Editar</button>
         </div>
 
     </form>
+  </div>
+</main>
 
   </body>
 </html>

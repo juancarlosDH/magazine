@@ -3,11 +3,11 @@ const path = require('path');
 const router = express.Router();
 const multer = require('multer')
 
-const controller = require('../controllers/productController')
+const controller = require('../controllers/authController')
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/img/products')
+    cb(null, 'public/img/users')
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
@@ -17,18 +17,12 @@ const storage = multer.diskStorage({
 
 const upload = multer ({storage})
 
-/* GET home page. */
-router.get('/', controller.index);
+router.get('/login', controller.showLogin);
+router.post('/login', controller.login);
 
-//rutas para crear
-router.get('/create', controller.formNew);
-router.post('/', upload.single('img'), controller.create);
+router.get('/register', controller.showRegister);
+router.post('/register', upload.any(), controller.register);
 
-//rutas para editar
-router.get('/edit/:id', controller.formEdit);
-router.put('/:id', controller.update);
-
-//ruta para eliminar
-router.delete('/:id', controller.delete);
+router.post('/logout', controller.logout);
 
 module.exports = router;
