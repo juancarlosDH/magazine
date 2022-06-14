@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 const multer = require('multer')
+const { check } = require('express-validator')
 
 const controller = require('../controllers/authController')
 
@@ -21,7 +22,19 @@ router.get('/login', controller.showLogin);
 router.post('/login', controller.login);
 
 router.get('/register', controller.showRegister);
-router.post('/register', upload.any(), controller.register);
+router.post('/register', upload.any(), [
+    check('email').isEmail().withMessage('El email es invalido'),
+    check('password', 'Password invalido').notEmpty().bail()
+      .custom(async (password, {req}) => {
+        const cpassword = req.body['confirm-password']
+   
+        // If password and confirm password not same
+        // don't allow to sign up and throw error
+        if(cpassword !== password){
+          throw new Error('Las pass deben coincidir')
+        }
+      }).bail()
+],  controller.register);
 
 router.post('/logout', controller.logout);
 

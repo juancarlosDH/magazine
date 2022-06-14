@@ -14,13 +14,18 @@
         <form class="form-new" action="/register" method="POST" enctype="multipart/form-data">
             <div>
                 <label for="email">Email</label>
-                <input type="text" name="email" id="email">
-                <span>Sitio para el error</span>
+                <input type="text" name="email" id="email" value="<%= locals.olds && olds.email ? olds.email : '' %>">
+                <% if (locals.errors && errors.email) { %>
+                <span><%= errors.email.msg %></span>
+                <% } %>
             </div>
 
             <div>
                 <label for="password">Password</label>
                 <input type="password" name="password" id="password">
+                <% if (locals.errors && errors.password) { %>
+                <span><%= errors.password.msg %></span>
+                <% } %>
             </div>
 
             <div>

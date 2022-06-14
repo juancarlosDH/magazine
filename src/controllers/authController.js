@@ -1,4 +1,5 @@
-const bcryptjs = require('bcryptjs')
+const bcryptjs = require('bcryptjs');
+const { validationResult } = require('express-validator');
 const databaseJson = require('../database/databaseJson')
 
 const databaseFilename = '../database/users.json';
@@ -11,13 +12,21 @@ const controller = {
         return res.send('logeando')
     },
     showRegister: function(req, res) {
+        res.locals.errors = { cosa: "nombre" }
         return res.render('auth/register')
     },
     register: function(req, res) {
-        //validar los datos
 
+        console.log(req.body)
+        //validar los datos
+        let errores = validationResult(req)
 
         //si hay errores, retornarlos a la vista
+        if (!errores.isEmpty()) {
+            let errors = errores.mapped()
+            console.log(errors)
+            return res.render('auth/register', {errors: errors, olds: req.body})
+        }
 
 
         //si esta bien registro al usuario
