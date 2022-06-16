@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mo = require('method-override');
+const ses = require('express-session');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -22,6 +23,27 @@ app.use(express.urlencoded({ extended: false }));
 app.use(mo('_method'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(ses({secret: 'es un secreto', resave: false, saveUninitialized: false}))
+
+// esto es un middleware de tiempo de session
+app.use(function(req, res, next){
+    let dateNow = Date.now()
+    console.log('dateNow', dateNow)
+    // reviso si es un usuario
+    if (req.session.user && req.session.lastActitity) {
+        // resto las fecha en formato numerico
+        let compare = dateNow - req.session.lastActitity
+        console.log('fechas comparadas', compare)
+        // si es mayor a 30 min, redirijo al login
+        if (compare > 1000*60*30) {
+            req.session.destroy()
+            return res.redirect('/login')
+        }
+        // sino actualizo la fecha en formato numerico
+        req.session.lastActitity = dateNow
+    }
+    return next()
+})
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

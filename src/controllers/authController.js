@@ -9,15 +9,50 @@ const controller = {
         return res.render('auth/login')
     },
     login: function(req, res) {
-        return res.send('logeando')
+        //validar los datos
+        let errores = validationResult(req)
+
+        //si hay errores, retornarlos a la vista
+        if (!errores.isEmpty()) {
+            let errors = errores.mapped()
+            console.log(errors)
+            return res.render('auth/login', {errors: errors, olds: req.body})
+        }
+ 
+        //leo el json
+        const users = databaseJson.readJson(databaseFilename)
+
+            console.log(req.body)
+        //buscar al usuario
+        let user = users.find(u => u.email.toLowerCase() == req.body.email.toLowerCase())
+        if (!user) {
+            return res.send('usuario o clave invalido')
+        }
+
+        //comparar las passwords
+        if (!bcryptjs.compareSync(req.body.password, user.password)) {
+            return res.send('usuario o clave invalido')
+        }
+
+        //guardar en session, sacar el password por seguridad
+        req.session.user = user
+
+        //guardo en la session la fecha en formato numero para luego comparar y validar que no pasen mas de
+            // X minutos de inactividad
+        req.session.lastActitity = Date.now()
+
+        //si está el recuerdame, le guardo una cookie
+        if (req.body.rememberMe) {
+            res.cookie('remember-me', user.email, {maxAge: 1000*60*60*24*30})
+        }
+
+        //redirigir al perfil
+        return res.redirect('/profile')
     },
     showRegister: function(req, res) {
-        res.locals.errors = { cosa: "nombre" }
         return res.render('auth/register')
     },
     register: function(req, res) {
-
-        console.log(req.body)
         //validar los datos
         let errores = validationResult(req)
 
@@ -30,7 +65,7 @@ const controller = {
 
 
         //si esta bien registro al usuario
-        //leer el json
+        //leo el json
         const users = databaseJson.readJson(databaseFilename) 
 
         const idCalculated = databaseJson.lastElementId(users) + 1
@@ -52,11 +87,24 @@ const controller = {
         //reescribo el json
         databaseJson.writeJson(users, databaseFilename)
 
-        //luego a donde redirijo?
-        return res.send('registrado')
+        //hago algo más? <--------
+        //luego a donde redirijo? <-----------
+        return res.redirect('/login')
     },
     logout: function(req, res) {
+        //eliminar la session
+
+        //si tengo el rememberme, eliminar la cookie
+        //res.clearCookie('key')
         return res.send('deslogeando')
+    },
+    profile: function(req, res){
+        console.log(req.session.user)
+        return res.send('datos del usuario')
+    },
+    confirmUser: function(req, res) {
+
+        return res.send('confirmando al usuaro')
     }
 }
 

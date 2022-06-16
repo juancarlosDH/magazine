@@ -1,6 +1,7 @@
 const databaseJson = require('../database/databaseJson')
 
 const databaseFilename = '../database/products.json';
+const categoriesFilename = '../database/categories.json';
 
 
 const controller = {
@@ -9,7 +10,9 @@ const controller = {
         return res.render('products/list', { products: prods });
     },
     formNew: function(req, res) {
-        return res.render('products/form');
+        const categories = databaseJson.readJson(categoriesFilename) 
+
+        return res.render('products/form', {categories});
     },
     create: function(req, res) {
         //leer el json

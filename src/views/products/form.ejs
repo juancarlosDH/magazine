@@ -25,7 +25,10 @@
             <div>
               <label for="category">Categoria</label>
               <select name="category" id="category">
-                <option value=""></option>
+                <option value="">--Seleccione--</option>
+                <% for (const cat of categories) { %>
+                <option value="<%= cat.id %>"><%= cat.name %></option>
+                <% } %>
               </select>
             </div>
 

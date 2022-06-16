@@ -38,4 +38,8 @@ router.post('/register', upload.any(), [
 
 router.post('/logout', controller.logout);
 
+router.get('/profile', controller.profile)
+
+router.get('/confirm-user', controller.confirmUser)
+
 module.exports = router;
